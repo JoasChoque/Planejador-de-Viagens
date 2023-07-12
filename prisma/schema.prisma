@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+//Base de dados criada através do prisma utilizando como provider postgres
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,3 +7,42 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+//modelando tabela de viagens
+model Trip{
+  id String @id @default(uuid())
+  name String
+  location String
+  startDate DateTime
+  endDate DateTime
+  pricePerDay Decimal @db.Decimal(8,2)
+  description String
+  coverImage String
+  imagesUrl String[] //colchetes para indicar que vai ser uma lista de string
+  highlights String[]
+  maxGuests Int
+  reservations TripReservation[]//ao usar colchetes fica implicita a relação entre as tabelas de N:1
+}
+
+//modelando tabela de reservas de viagem
+model TripReservation{
+  id String @id @default(uuid())
+  tripId String 
+  trip Trip @relation(fields: [tripId],references: [id])
+  userId String
+  user User @relation(fields: [userId],references: [id])
+  startDate DateTime
+  endDate DateTime
+  totalPaid Decimal @db.Decimal(8,2)
+}
+
+//modelando tabela de usuários
+model User{
+  id String @id @default(uuid())
+  reservation TripReservation[]
+}
+
+//Anotações
+//@default(uuid()) -> significa que caso algum id não seja passado, ele vai gerar um valor aleatório como default
+//@db.Decimal(8,2) -> indica casas antes e depois da virgula
